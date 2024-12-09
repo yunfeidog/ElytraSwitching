@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "elytraswitching",
+  "version": "${version}",
+  "name": "ElytraSwitching",
+  "description": "A mod to switch between elytra and chestplate based on conditions.",
+  "authors": ["Your Name"],
+  "license": "All-Rights-Reserved",
+  "icon": "assets/elytraswitching/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.yunfei.elytraswitching.client.ElytraswitchingClient"
+    ]
+  },
+  "mixins": [
+    "elytraswitching.client.mixins.json",
+    "elytraswitching.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "fabric": "*",
+    "minecraft": "1.21.4"
+  }
+}
