@@ -17,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientPlayerEntityMixin {
 
     private static final int CHESTPLATE_INDEX = 6;
-    private int lastIndex = -1;
     private long fireworkStartTime = -1;
+    private long chestplateStartTime = -1;
 
     @Inject(method = "tickMovement", at = @At(value = "TAIL"))
     private void onPlayerTickMovement(CallbackInfo ci) {
@@ -29,24 +29,29 @@ public class ClientPlayerEntityMixin {
         // 检测烟花或三叉戟的持有时间
         if (currentItem instanceof FireworkRocketItem || currentItem instanceof TridentItem) {
             if (fireworkStartTime == -1) { // 第一次检测到烟花或三叉戟
-                fireworkStartTime = System.currentTimeMillis(); //开始计时
+                fireworkStartTime = System.currentTimeMillis(); // 开始计时
+                chestplateStartTime = -1;
             } else if (System.currentTimeMillis() - fireworkStartTime >= 3000) {
                 this.equipElytra(player, interactionManager);
+                fireworkStartTime = -1;
+                chestplateStartTime = -1;
             }
         } else {
-            fireworkStartTime = -1;
-            if (player.isOnGround() && System.currentTimeMillis() - fireworkStartTime >= 3000) {
-                // 检查玩家是否已经穿着胸甲
-                Item item = player.getInventory().armor.get(2).getItem();
-                if (isChestplate(item)) {
-                    return;
-                }
-                int idx = getChestplateIndex(player);
-                if (idx != -1) {
-                    if (interactionManager != null) {
-                        interactionManager.clickSlot(player.playerScreenHandler.syncId, CHESTPLATE_INDEX, idx, SlotActionType.SWAP, player);
+            if (!player.isOnGround()) {
+                return;
+            }
+            if (chestplateStartTime == -1) {
+                chestplateStartTime = System.currentTimeMillis();
+                fireworkStartTime = -1;
+            } else if (System.currentTimeMillis() - chestplateStartTime >= 3000) {
+                if (player.isOnGround()) {
+                    // 检查玩家是否已经穿着胸甲
+                    Item item = player.getInventory().armor.get(2).getItem();
+                    if (!isChestplate(item)) {
+                        equipChestplate(player, interactionManager);
                     }
-                    lastIndex = -1;
+                    fireworkStartTime = -1;
+                    chestplateStartTime = -1;
                 }
             }
         }
@@ -59,8 +64,29 @@ public class ClientPlayerEntityMixin {
     private void equipElytra(ClientPlayerEntity player, ClientPlayerInteractionManager interactionManager) {
         int firstElytraIndex = this.getElytraIndex(player);
         if (firstElytraIndex != -1) {
-            this.lastIndex = firstElytraIndex;
-            interactionManager.clickSlot(player.playerScreenHandler.syncId, CHESTPLATE_INDEX, firstElytraIndex, SlotActionType.SWAP, player);
+            try {
+                interactionManager.clickSlot(player.playerScreenHandler.syncId, 6, firstElytraIndex, SlotActionType.SWAP, player);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+
+            }
+        }
+    }
+
+    /**
+     * 装备胸甲
+     */
+    private void equipChestplate(ClientPlayerEntity player, ClientPlayerInteractionManager interactionManager) {
+        int firstChestplateIndex = this.getChestplateIndex(player);
+        if (firstChestplateIndex != -1) {
+            try {
+                interactionManager.clickSlot(player.playerScreenHandler.syncId, 6, firstChestplateIndex, SlotActionType.SWAP, player);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+            }
         }
     }
 
