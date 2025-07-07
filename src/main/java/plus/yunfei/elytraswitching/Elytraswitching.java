@@ -1,4 +1,4 @@
-package com.yunfei.elytraswitching;
+package plus.yunfei.elytraswitching;
 
 import net.fabricmc.api.ModInitializer;
 

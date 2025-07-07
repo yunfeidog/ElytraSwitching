@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.yunfei.elytraswitching.mixin",
+  "package": "plus.yunfei.elytraswitching.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
