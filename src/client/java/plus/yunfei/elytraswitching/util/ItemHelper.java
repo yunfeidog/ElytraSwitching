@@ -1,6 +1,7 @@
 package plus.yunfei.elytraswitching.util;
 
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -24,18 +25,18 @@ public class ItemHelper {
      */
     public static boolean isChestplate(Item item) {
         return item == Items.DIAMOND_CHESTPLATE ||
-               item == Items.IRON_CHESTPLATE ||
-               item == Items.GOLDEN_CHESTPLATE ||
-               item == Items.CHAINMAIL_CHESTPLATE ||
-               item == Items.NETHERITE_CHESTPLATE ||
-               item == Items.LEATHER_CHESTPLATE;
+                item == Items.IRON_CHESTPLATE ||
+                item == Items.GOLDEN_CHESTPLATE ||
+                item == Items.CHAINMAIL_CHESTPLATE ||
+                item == Items.NETHERITE_CHESTPLATE ||
+                item == Items.LEATHER_CHESTPLATE;
     }
 
     /**
      * 检查玩家是否已经穿着胸甲
      */
     public static boolean isWearingChestplate(ClientPlayerEntity player) {
-        Item armorItem = player.getInventory().armor.get(2).getItem();
+        Item armorItem = player.getEquippedStack(EquipmentSlot.CHEST).getItem();
         return isChestplate(armorItem);
     }
 
@@ -44,10 +45,10 @@ public class ItemHelper {
      */
     public static int getElytraIndex(ClientPlayerEntity player) {
         var inventory = player.getInventory();
-        
+
         // 搜索完整背包（快捷栏 0-8 + 主背包 9-35）
-        for (int i = 0; i < inventory.main.size(); i++) {
-            if (inventory.main.get(i).getItem() == Items.ELYTRA) {
+        for (int i = 0; i < inventory.getMainStacks().size(); i++) {
+            if (inventory.getMainStacks().get(i).getItem() == Items.ELYTRA) {
                 return i;
             }
         }
@@ -59,10 +60,10 @@ public class ItemHelper {
      */
     public static int getChestplateIndex(ClientPlayerEntity player) {
         var inventory = player.getInventory();
-        
+
         // 搜索完整背包（快捷栏 0-8 + 主背包 9-35）
-        for (int i = 0; i < inventory.main.size(); i++) {
-            Item item = inventory.main.get(i).getItem();
+        for (int i = 0; i < inventory.getMainStacks().size(); i++) {
+            Item item = inventory.getMainStacks().get(i).getItem();
             if (isChestplate(item)) {
                 return i;
             }

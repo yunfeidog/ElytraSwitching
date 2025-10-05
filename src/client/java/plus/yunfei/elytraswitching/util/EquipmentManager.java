@@ -1,5 +1,6 @@
 package plus.yunfei.elytraswitching.util;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -47,45 +48,33 @@ public class EquipmentManager {
         }
     }
 
-
-    /**
-     * 执行鞘翅与胸甲槽物品交换
-     */
-    private static void performElytraSwap(ClientPlayerEntity player, ClientPlayerInteractionManager interactionManager, int elytraIndex) {
-        ElytraswitchingClient.logger("开始交换鞘翅，索引: " + elytraIndex);
+    private static void performElytraSwap(ClientPlayerEntity player, ClientPlayerInteractionManager interactionManager, int equipIndex) {
+        ElytraswitchingClient.logger("执行装备交换，索引: " + equipIndex);
         try {
-            // 第一步：拿起鞘翅
-            interactionManager.clickSlot(
-                    player.playerScreenHandler.syncId,
-                    elytraIndex,
-                    0,
-                    SlotActionType.PICKUP,
-                    player
-            );
-
-            // 第二步：点击胸甲槽 - 这会将鞘翅放到胸甲槽，同时拿起胸甲槽原有物品
-            interactionManager.clickSlot(
-                    player.playerScreenHandler.syncId,
-                    CHESTPLATE_SLOT_INDEX,
-                    0,
-                    SlotActionType.PICKUP,
-                    player
-            );
-
-            // 第三步：将胸甲槽原有物品放到鞘翅原来的位置
-            interactionManager.clickSlot(
-                    player.playerScreenHandler.syncId,
-                    elytraIndex,
-                    0,
-                    SlotActionType.PICKUP,
-                    player
-            );
-
-            ElytraswitchingClient.logger("鞘翅交换成功");
-
+            // 背包中的目标物品
+            var inventory = player.getInventory();
+            var targetStack = inventory.getStack(equipIndex);
+            if (targetStack.isEmpty()) {
+                ElytraswitchingClient.logger("索引 " + equipIndex + " 没有物品");
+                return;
+            }
+            // 当前胸甲槽物品
+            var chestStack = player.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST);
+            // 胸甲槽有物品 → 放回背包对应格
+            if (!chestStack.isEmpty()) {
+                inventory.setStack(equipIndex, chestStack.copy());
+            } else {
+                // 胸甲槽为空 → 清掉原背包物品
+                inventory.removeStack(equipIndex);
+            }
+            // 穿上背包物品（鞘翅或胸甲）
+            player.equipStack(net.minecraft.entity.EquipmentSlot.CHEST, targetStack.copy());
+            // 标记背包刷新
+            inventory.markDirty();
+            ElytraswitchingClient.logger("装备切换成功（纯客户端）");
         } catch (Exception e) {
-            ElytraswitchingClient.logger("鞘翅交换失败: " + e.getMessage());
+            ElytraswitchingClient.logger("装备切换失败: " + e.getMessage());
             e.printStackTrace();
         }
     }
-} 
+}
